@@ -4,15 +4,16 @@ set cpo&vim
 
 function ivi#open(count, mods) abort
   let ivi_winnr = bufwinnr('^' . g:ivi_bufname . '$')
-  if ivi_winnr < 0
-    let winheight = a:count ? a:count : get(g:, 'ivi_winheight', '')
 
-    execute a:mods 'noswapfile belowright' winheight . 'split' g:ivi_bufname
-    call s:init_buffer()
-  else
+  if ivi_winnr > 0
     execute a:mods ivi_winnr . 'wincmd w'
+    return
   endif
 
+  let winheight = a:count ? a:count : get(g:, 'ivi_winheight', '')
+
+  execute a:mods 'noswapfile belowright' winheight . 'split' g:ivi_bufname
+  call s:init_buffer()
   startinsert
 endfunction
 
@@ -36,10 +37,10 @@ function s:callback(command) abort
   call s:run_command(a:command)
   redir END
 
-  call win_gotoid(save_winid)
-  call append(line('$') - 1, split(output, "\n"))
-
-  set nomodified
+  if win_gotoid(save_winid)
+    call append(line('$') - 1, split(output, "\n"))
+    set nomodified
+  endif
 endfunction
 
 
