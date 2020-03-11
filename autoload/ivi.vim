@@ -15,15 +15,19 @@ function ivi#open(count, mods) abort
         \ ''
 
   execute a:mods 'noswapfile belowright' winheight 'split' g:ivi_config.bufname
-  call s:init_buffer()
+  call s:init_buffer(winheight isnot# '')
   startinsert
 endfunction
 
 
-function s:init_buffer() abort
-  set bufhidden=wipe
-  set buftype=prompt
-  set filetype=vim
+function s:init_buffer(winfixheight) abort
+  setlocal bufhidden=wipe
+  setlocal nobuflisted
+  setlocal buftype=prompt
+  setlocal filetype=vim
+  if a:winfixheight
+    setlocal winfixheight
+  endif
 
   call prompt_setprompt(bufnr(''), ':')
   call prompt_setcallback(bufnr(''), function('s:callback'))
