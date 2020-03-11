@@ -32,10 +32,18 @@ function s:init_buffer(winfixheight) abort
   call prompt_setprompt(bufnr(''), ':')
   call prompt_setcallback(bufnr(''), function('s:callback'))
   call prompt_setinterrupt(bufnr(''), function('s:interrupt'))
+
+  call s:setbufvar_async(bufnr(''), '&modified', 0)
 endfunction
 
 
 function s:callback(command) abort
+  call s:setbufvar_async(bufnr(''), '&modified', 0)
+
+  if a:command ==# ''
+    return
+  endif
+
   let save_winid = win_getid()
   wincmd p
 
@@ -45,7 +53,6 @@ function s:callback(command) abort
 
   if win_gotoid(save_winid)
     call append(line('$') - 1, split(output, "\n"))
-    set nomodified
   endif
 endfunction
 
@@ -58,6 +65,11 @@ endfunction
 
 function s:run_command(command) abort
   silent! execute a:command
+endfunction
+
+
+function s:setbufvar_async(expr, varname, val) abort
+  call timer_start(0, {-> setbufvar(a:expr, a:varname, a:val)})
 endfunction
 
 
